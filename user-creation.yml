@@ -1,0 +1,20 @@
+---
+- hosts: DEPLOYMENTSRV
+  become: true
+  vars:
+    # created with:
+    # python -c 'import crypt; print crypt.crypt("1ns3cur3", "insecure")'
+    password: inyr/N2x97F.E
+
+  tasks:
+  - name: Add deployment user to the system
+    user:
+      name: "{{ item }}"
+      password: "{{ password }}"
+      shell: /bin/bash
+      groups: sudo
+      append: yes
+      state: present
+      createhome: yes
+    with_items:
+    - deployment
