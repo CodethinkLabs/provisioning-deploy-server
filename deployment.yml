@@ -1,0 +1,36 @@
+- hosts: DEPLOYMENTSRV
+  tasks:
+  - name: Install lighttpd
+    apt:
+      name: lighttpd
+      state: latest
+      update_cache: yes
+    become: true
+
+  - name: Create directory for server
+    file:
+      path: "/home/{{ item }}/server"
+      state: directory
+      owner: "{{ item }}"
+      group: "{{ item }}"
+    with_items:
+    - deployment
+
+  - name: Copy configuration file for lighttpd
+    copy:
+      src: "{{ item }}"
+      dest: /etc/lighttpd/
+      owner: root
+    with_items:
+    - lighttpd.conf
+    become: true
+
+  - name: Restart lighttpd
+    shell: '/etc/init.d/lighttpd restart'
+    become: true
+
+  - name: Add CI public key to authorized keys
+    authorized_key:
+      user: deployment
+      state: present
+      key: "{{ lookup('file', './deployment_key.pub') }}"
